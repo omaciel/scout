@@ -48,7 +48,8 @@ def fetch_build_data(username, password, server, plan):
     Fetches and returns a dictionary representing certain results from the latest build of a plan.
     """
     
-    plan_record = None
+    errors = plan_date = plan_url = plan_status = plan_record = None
+    skipped = failed = passed = total = 0
     
     url = "%s/%s/api/json" % (server, plan)
     auth = (username, password)
@@ -57,10 +58,10 @@ def fetch_build_data(username, password, server, plan):
 
     if plan_r.status_code == 200:
         plan_data = plan_r.json()
-        last_build = plan_data['lastBuild']
+        last_build = plan_data['lastCompletedBuild']
 
         if last_build is None:
-            print "No builds found for plan %s." % plan
+            errors = "No builds found for plan %s." % plan
         else:
             url = "%sapi/json" % last_build['url']
             build_r = requests.get(url, auth=auth)
@@ -71,30 +72,36 @@ def fetch_build_data(username, password, server, plan):
                     results = build_data['actions']
 
                     # Extract results from build run
-                    counts = [x for x in results if type(x) == dict and 'skipCount' in x.keys()][0]
-
-                    if counts is None or len(counts) == 0:
-                        print "No results for this plan!"
-                        sys.exit(-1)
-
-                    total_tests = counts['totalCount'] - counts['skipCount'] - counts['failCount']
-                    plan_record = {
-                        'skipped' : counts['skipCount'],
-                        'failed' : counts['failCount'],
-                        'total' : counts['totalCount'],
-                        'passed' : total_tests,
-                        'date' : build_data['id'].split('_')[0],
-                        'url' : build_data['url'],
-                        'status' : build_data['result'],
-                    }
+                    counts = [x for x in results if type(x) == dict and 'skipCount' in x.keys()]
+                    if counts:
+                        skipped = counts[0]['skipCount']
+                        failed = counts[0]['failCount']
+                        total = counts[0]['totalCount']
+                        passed = total - skipped - failed
+                        plan_date = build_data['id'].split('_')[0]
+                        plan_url = build_data['url']
+                        plan_status = build_data['result']
+                    else:
+                        errors = "Could not find results for latest build."
                     
                 except Exception, e:
-                    print "Could not fetch results for latest build"
-                    print str(e)
+                    errors = "Could not fetch results for latest build: %s" % str(e)
                     pass
 
     else:
-        print "Could not fetch report for %s" % plan
+        errors = "Could not fetch report for %s" % plan
+
+    plan_record = {
+        'name' : plan,
+        'skipped' : skipped,
+        'failed' : failed,
+        'total' : total,
+        'passed' : passed,
+        'date' : plan_date,
+        'url' : plan_url,
+        'status' : plan_status,
+        'errors' : errors,
+        }
 
     return plan_record
 
