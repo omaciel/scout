@@ -31,6 +31,18 @@ password=hudson_user_password
 url=hudson_url/hudson/job
 ```
 
+You can also use **python** and use the data returned to create different outputs:
+
+```python
+from scout import *
+
+data = fetch_build_data("username", "password", "http://my.hudson.com/job", "project-cli")
+
+print "|| || %(date)s || %(passed)s || %(skipped)s || %(failed)s || %(total)s || %(url)s || ||" % data
+
+|| || 2013-05-03 || 257 || 46 || 32 || 335 || http://hudson.rhq.lab.eng.bos.redhat.com:8080/hudson/job/katello-gui/277/ || ||
+```
+
 Installation
 ------------
 
