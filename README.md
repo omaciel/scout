@@ -24,11 +24,11 @@ The configuration file has the following format:
 
 ```
 [user]
-username=hudson_user
-password=hudson_user_password
+username=jenkins_user
+password=jenkins_user_password
 
 [server]
-url=hudson_url/hudson/job
+url=jenkins_url/jenkins/job
 ```
 
 You can also use **python** and use the data returned to create different outputs:
@@ -36,11 +36,11 @@ You can also use **python** and use the data returned to create different output
 ```python
 from scout import *
 
-data = fetch_build_data("username", "password", "http://my.hudson.com/job", "project-cli")
+data = fetch_build_data("username", "password", "http://my.jenkins.com/job", "project-cli")
 
 print "|| || %(date)s || %(passed)s || %(skipped)s || %(failed)s || %(total)s || %(url)s || ||" % data
 
-|| || 2013-05-03 || 257 || 46 || 32 || 335 || http://hudson.rhq.lab.eng.bos.redhat.com:8080/hudson/job/katello-gui/277/ || ||
+|| || 2013-05-03 || 257 || 46 || 32 || 335 || http://jenkins.rhq.lab.eng.bos.redhat.com:8080/jenkins/job/katello-gui/277/ || ||
 ```
 
 Installation
