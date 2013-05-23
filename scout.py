@@ -41,16 +41,16 @@ def _parse_config(cfile):
         sys.exit(-1)
 
     return (username, password, server)
-    
-    
+
+
 def fetch_build_data(username, password, server, plan):
     """
     Fetches and returns a dictionary representing certain results from the latest build of a plan.
     """
-    
+
     errors = plan_date = plan_url = plan_status = plan_record = None
     skipped = failed = passed = total = 0
-    
+
     url = "%s/%s/api/json" % (server, plan)
     auth = (username, password)
 
@@ -65,14 +65,14 @@ def fetch_build_data(username, password, server, plan):
         else:
             url = "%sapi/json" % last_build['url']
             build_r = requests.get(url, auth=auth)
-            
+
             if build_r.status_code == 200:
                 try:
                     build_data = build_r.json()
                     results = build_data['actions']
 
                     # Extract results from build run
-                    counts = [x for x in results if type(x) == dict and 'skipCount' in x.keys()]
+                    counts = [x for x in results if type(x) == dict and 'testReport' in x.values()]
                     if counts:
                         skipped = counts[0]['skipCount']
                         failed = counts[0]['failCount']
@@ -83,7 +83,7 @@ def fetch_build_data(username, password, server, plan):
                         plan_status = build_data['result']
                     else:
                         errors = "Could not find results for latest build."
-                    
+
                 except Exception, e:
                     errors = "Could not fetch results for latest build: %s" % str(e)
                     pass
@@ -129,9 +129,9 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         options.username, options.password, options.server = _parse_config(options.config)
-        
+
     else:
-            
+
         if not options.username or not options.password or not options.plan:
             p.print_help()
             sys.exit(-1)
