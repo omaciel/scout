@@ -73,6 +73,8 @@ def fetch_build_data(username, password, server, plan):
 
                     # Extract results from build run
                     counts = [x for x in results if type(x) == dict and 'testReport' in x.values()]
+                    if not counts:
+                        counts = [x for x in results if type(x) == dict and 'testngreports' in x.values()]
                     if counts:
                         skipped = counts[0]['skipCount']
                         failed = counts[0]['failCount']
