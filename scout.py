@@ -49,7 +49,7 @@ def fetch_build_data(username, password, server, plan):
     """
 
     errors = plan_date = plan_url = plan_status = plan_record = None
-    skipped = failed = passed = total = 0
+    skipped = failed = passed = total = passrate = 0
 
     url = "%s/%s/api/json" % (server, plan)
     auth = (username, password)
@@ -83,6 +83,7 @@ def fetch_build_data(username, password, server, plan):
                         plan_date = build_data['id'].split('_')[0]
                         plan_url = build_data['url']
                         plan_status = build_data['result']
+                        passrate = round(passed / float(total) * 100, 1)
                     else:
                         errors = "Could not find results for latest build."
 
@@ -103,6 +104,7 @@ def fetch_build_data(username, password, server, plan):
         'url' : plan_url,
         'status' : plan_status,
         'errors' : errors,
+        'passrate': passrate,
         }
 
     return plan_record
